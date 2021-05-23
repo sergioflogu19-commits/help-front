@@ -17,3 +17,15 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::group(['prefix' => 'parametros'], function() {
+    Route::get('categoria', 'ParametroController@categoria');
+    Route::get('tipo_requerimiento/{id}', 'ParametroController@tipoRequerimiento');
+    Route::get('municipio', 'ParametroController@municipio');
+    Route::get('sucursal/{id}', 'ParametroController@sucursal');
+    Route::get('departamento', 'ParametroController@departamento');
+});
+
+Route::group(['prefix' => 'funcionario'], function() {
+    Route::post('solicitar_req', 'SolicitudRequerimientoController@solicitudReq');
+});
