@@ -5,10 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\DptoSucursal;
 use App\Models\Requerimiento;
 use Illuminate\Http\Request;
+use Namshi\JOSE\SimpleJWS;
 
 class SolicitudRequerimientoController extends Controller
 {
     public function solicitudReq(Request $request){
+        $secreto = config('jwt.secret');
+        $jws = SimpleJWS::load($request->input('token'));
+        if (!$jws->isValid($secreto)){
+            return  response()->json([
+                'respuesta' => false,
+                'message' => 'Tiempo de sesión ha terminado'
+            ]);
+        }
+
         DptoSucursal::create([
             'sucursal_id_sucursal' => $request['sucursal_id_sucursal'],
             'departamento_id_departamento' => $request['departamento_id_departamento'],

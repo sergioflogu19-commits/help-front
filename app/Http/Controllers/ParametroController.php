@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Cargo;
 use App\Models\Categoria;
 use App\Models\Departamento;
 use App\Models\Municipio;
+use App\Models\Rol;
 use App\Models\Sucursal;
 use App\Models\TipoRequerimiento;
 use Illuminate\Http\Request;
@@ -58,6 +60,20 @@ class ParametroController extends Controller
         return response()->json([
             'respuesta' => true,
             'departamentos' => Departamento::all()
+        ]);
+    }
+
+    public function rol(){
+        return response()->json([
+            'respuesta' => true,
+            'roles' => Rol::all()
+        ]);
+    }
+
+    public function cargo(){
+        return response()->json([
+            'respuesta' => true,
+            'cargos' => Cargo::all()
         ]);
     }
 }

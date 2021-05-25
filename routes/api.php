@@ -14,9 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::post('login', 'UsuarioController@login');
+Route::post('registro', 'UsuarioController@registro');
+Route::post('/logout', 'UsuarioController@logout');
 
 Route::group(['prefix' => 'parametros'], function() {
     Route::get('categoria', 'ParametroController@categoria');
@@ -24,6 +24,8 @@ Route::group(['prefix' => 'parametros'], function() {
     Route::get('municipio', 'ParametroController@municipio');
     Route::get('sucursal/{id}', 'ParametroController@sucursal');
     Route::get('departamento', 'ParametroController@departamento');
+    Route::get('rol', 'ParametroController@rol');
+    Route::get('cargo', 'ParametroController@cargo');
 });
 
 Route::group(['prefix' => 'funcionario'], function() {
