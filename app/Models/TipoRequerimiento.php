@@ -11,5 +11,9 @@ class TipoRequerimiento extends Model
     protected $primaryKey = 'id_tipo_req';
     public $timestamps = false;
 
-    protected $fillable = ['sub_cat', 'cod', 'categoria_id_categoria'];
+    protected $fillable = [
+        'sub_cat', 'cod', 'categoria_id_categoria', 'division_id_division'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }

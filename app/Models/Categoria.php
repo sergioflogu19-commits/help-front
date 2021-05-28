@@ -12,4 +12,7 @@ class Categoria extends Model
     public $timestamps    = false;
 
     protected $fillable = ['categoria', 'cod'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }

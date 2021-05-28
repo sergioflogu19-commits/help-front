@@ -12,4 +12,11 @@ class Estado extends Model
     public $timestamps = false;
 
     protected $fillable = ['estado', 'cod'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
+
+    const EN_ESPERA = 1;
+    const EN_PROCESO = 2;
+    const CERRADO = 3;
 }

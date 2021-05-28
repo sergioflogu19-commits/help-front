@@ -12,4 +12,7 @@ class Municipio extends Model
     public $timestamps = false;
 
     protected $fillable = ['lugar', 'cod'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }

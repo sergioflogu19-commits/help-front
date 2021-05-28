@@ -12,4 +12,7 @@ class Sucursal extends Model
     public $timestamps = false;
 
     protected $fillable = ['sucursal', 'cod', 'municipio_id_lugar'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }

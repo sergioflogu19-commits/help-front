@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Rol;
 use App\Models\Usuario;
 use App\User;
 use Illuminate\Http\Request;
@@ -21,8 +22,9 @@ class UsuarioController extends Controller
         $usuario->ap_materno = $request->input('ap_materno');
         $usuario->email = $request->input('email');
         $usuario->password = bcrypt($request->input('password'));
-        $usuario->rol_id_rol = $request->input('rol_id_rol');
+        $usuario->rol_id_rol = Rol::FUNCIONARIO;
         $usuario->cargo_id_cargo = $request->input('cargo_id_cargo');
+        $usuario->division_id_division = $request->input('division_id_division');
         $usuario->save();
 
         if ($this->loginAfterSignUp) return $this->login($request);
@@ -57,11 +59,10 @@ class UsuarioController extends Controller
             $secreto = config('jwt.secret');
             $jws = SimpleJWS::load($request->input('token'));
             if (!$jws->isValid($secreto)){
-                return  response()->json([
-                    'respuesta' => false,
-                    'message' => 'Al usuario no se le pudo cerrar la sesión'
-                ]);
+
             }
+
+            JWTAuth::invalidate($request->input('token'));
             return response()->json([
                 'respuesta' => true,
                 'mensaje' => 'Cierre de sesión exitoso'
@@ -72,13 +73,5 @@ class UsuarioController extends Controller
                 'message' => 'Al usuario no se le pudo cerrar la sesión'
             ]);
         }
-    }
-
-    public function getAuthUser(Request $request){
-        $usuario = JWTAuth::authenticate($request->input('token'));
-        return  response()->json([
-            'respuesta' => true,
-            'usuario' => $usuario
-        ]);
     }
 }

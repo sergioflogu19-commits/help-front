@@ -12,4 +12,7 @@ class Cargo extends Model
     public $timestamps    = false;
 
     protected $fillable = ['cargo', 'cod', 'prioridad_id_prioridad'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }

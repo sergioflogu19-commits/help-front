@@ -3,43 +3,87 @@
 namespace App\Http\Controllers;
 
 use App\Models\DptoSucursal;
+use App\Models\Estado;
 use App\Models\Requerimiento;
+use App\Models\Rol;
+use App\Models\Ticket;
+use App\User;
 use Illuminate\Http\Request;
 use Namshi\JOSE\SimpleJWS;
 
 class SolicitudRequerimientoController extends Controller
 {
     public function solicitudReq(Request $request){
-        $secreto = config('jwt.secret');
-        $jws = SimpleJWS::load($request->input('token'));
-        if (!$jws->isValid($secreto)){
+        //validamos el token enviado
+        if ($this->validaToken($request->input('token'))){
             return  response()->json([
                 'respuesta' => false,
-                'message' => 'Tiempo de sesión ha terminado'
+                'mensaje' => 'Tiempo de sesión ha terminado'
             ]);
         }
 
-        DptoSucursal::create([
-            'sucursal_id_sucursal' => $request['sucursal_id_sucursal'],
-            'departamento_id_departamento' => $request['departamento_id_departamento'],
-        ]);
+        if ($this->obtieneIdUsuario($request->input('email')) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para el registro'
+            ]);
+        }
 
-        $requerimiento = Requerimiento::create([
-            'descripcion' => $request->input('descripcion'),
-            'interno' => $request->input('interno'),
-            'usuario_id_usuario' => $request->input('usuario_id_usuario'),
-            'departamento_id_departamento' => $request->input('departamento_id_departamento'),
-            'tipo_requerimiento_id_tipo_req' => $request->input('tipo_requerimiento_id_tipo_req'),
-        ]);
-        if ($requerimiento){
+        //se crea el requerimiento en BD
+        $requerimiento = new Requerimiento();
+        $requerimiento->descripcion = $request->input('descripcion');
+        $requerimiento->interno = $request->input('interno');
+        $requerimiento->usuario_id_usuario = $this->obtieneIdUsuario($request->input('email'));
+        $requerimiento->departamento_id_departamento = $request->input('departamento_id_departamento');
+        $requerimiento->tipo_requerimiento_id_tipo_req = $request->input('tipo_requerimiento_id_tipo_req');
+        $requerimiento->sucursal_id_sucursal = $request->input('sucursal_id_sucursal');
+        $respuesta = $requerimiento->save();
+
+        if ($respuesta){
+            //a la par se crea el TIcket en espera
+            $ticket = new Ticket();
+            $ticket->numero = 0;
+            $ticket->estado_id_estado = Estado::EN_ESPERA;
+            $ticket->requerimiento_id_requerimiento = $requerimiento->id_requerimiento;
+            $ticket->comentarios = '';
+            $respuesta = $ticket->save();
+            if ($respuesta){
+                // se añade un numero de acuerdo al total de tickets
+                $listaTicket = Ticket::all();
+                $ticket->numero = $listaTicket->count();
+                $ticket->save();
+                return response()->json([
+                    'respuesta' => true,
+                    'requerimiento' => $requerimiento
+                ]);
+            }
             return response()->json([
                 'respuesta' => true,
-                'requerimiento' => $requerimiento
+                'mensaje' => 'Error al guardar los datos en la Base de Datos'
             ]);
+
         }
         return response()->json([
             'respuesta' => false,
             'mensaje' => 'Error al guardar los datos en la Base de Datos'
         ]);
+    }
+
+    private function validaToken($token){
+        $secreto = config('jwt.secret');
+        $jws = SimpleJWS::load($token);
+        if (!$jws->isValid($secreto)){
+            return true;
+        }
+        return false;
+    }
+
+    private function obtieneIdUsuario($email){
+        $usuario = User::where('email', $email)
+            ->where('baja_logica', false)
+            ->where('rol_id_rol', Rol::FUNCIONARIO)
+            ->first();
+        if ($usuario == null) return null;
+        else return $usuario->id_usuario;
     }
 }

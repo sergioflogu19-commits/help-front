@@ -12,4 +12,7 @@ class Departamento extends Model
     public $timestamps    = false;
 
     protected $fillable = ['departamento', 'cod'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }

@@ -12,4 +12,7 @@ class CalificacionTicket extends Model
     public $timestamps    = false;
 
     protected $fillable = ['calificacion_id_calificacion', 'ticket_id_ticket', 'usuario_id_usuario'];
+    protected $hidden = [
+        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+    ];
 }
