@@ -17,4 +17,6 @@ class Rol extends Model
     ];
 
     const FUNCIONARIO = 1;
+    const AGENTE = 2;
+    const ADMINISTRADOR = 3;
 }

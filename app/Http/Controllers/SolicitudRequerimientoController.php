@@ -42,9 +42,11 @@ class SolicitudRequerimientoController extends Controller
         if ($respuesta){
             //a la par se crea el TIcket en espera
             $ticket = new Ticket();
+            //momentaneo
             $ticket->numero = 0;
             $ticket->estado_id_estado = Estado::EN_ESPERA;
             $ticket->requerimiento_id_requerimiento = $requerimiento->id_requerimiento;
+            //TODO
             $ticket->comentarios = '';
             $respuesta = $ticket->save();
             if ($respuesta){

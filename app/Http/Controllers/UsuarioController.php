@@ -47,7 +47,7 @@ class UsuarioController extends Controller
         return response()->json([
             'respuesta' => true,
             'mensaje' => 'Inicio de sesion autorizado',
-            'token' => $jwt_token
+            'token' => $jwt_token,
         ]);
     }
 
@@ -73,5 +73,29 @@ class UsuarioController extends Controller
                 'message' => 'Al usuario no se le pudo cerrar la sesión'
             ]);
         }
+    }
+
+    public function recursoUsuario(Request $request)
+    {
+        if ($this->validaToken($request->input('token'))) {
+            return response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Tiempo de sesión ha terminado'
+            ]);
+        }
+        $usuario = User::where('email', $request->input('email'))->first();
+        return response()->json([
+            'respuesta' => true,
+            'id_rol' => $usuario->rol_id_rol
+        ]);
+    }
+
+    private function validaToken($token){
+        $secreto = config('jwt.secret');
+        $jws = SimpleJWS::load($token);
+        if (!$jws->isValid($secreto)){
+            return true;
+        }
+        return false;
     }
 }
