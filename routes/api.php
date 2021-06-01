@@ -31,6 +31,8 @@ Route::group(['prefix' => 'parametros'], function() {
 
 Route::group(['prefix' => 'funcionario'], function() {
     Route::post('solicitar_req', 'SolicitudRequerimientoController@solicitudReq');
+    Route::post('ver_solicitudes', 'TicketController@verSolicitudes');
+    Route::post('calificacion', 'TicketController@calificacion');
 });
 Route::group(['prefix' => 'agente'], function() {
     Route::post('tickets', 'TicketController@listadoReq');

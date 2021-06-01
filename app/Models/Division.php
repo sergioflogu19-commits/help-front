@@ -15,4 +15,6 @@ class Division extends Model
     protected $hidden = [
         'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
     ];
+
+    const OTROS = 6;
 }

@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asignado;
+use App\Models\CalificacionTicket;
 use App\Models\Estado;
 use App\Models\Requerimiento;
 use App\Models\Rol;
 use App\Models\Ticket;
 use App\User;
 use Illuminate\Http\Request;
+use Namshi\JOSE\SimpleJWS;
 
 class TicketController extends Controller
 {
@@ -31,7 +33,7 @@ class TicketController extends Controller
         if ($ticket->estado_id_estado == Estado::EN_ESPERA){
             $ticket->fecha_registro = date('d/m/Y h:i:sa');
             $ticket->save();
-            $respuesta = User::where('email', $request->input('usuario'))
+            $respuesta = User::where('email', $request->input('email'))
                 ->where('baja_logica', false)
                 ->first();
             $usuario = "$respuesta->nombre $respuesta->ap_paterno";
@@ -49,7 +51,7 @@ class TicketController extends Controller
     }
 
     public function tomarTicket(Request $request){
-        if ($this->obtieneIdUsuario($request->input('usuario')) == null){
+        if ($this->obtieneIdUsuario($request->input('email'), Rol::AGENTE) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
@@ -58,7 +60,7 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($request->input('idTicket'));
         $ticket->estado_id_estado = Estado::EN_PROCESO;
         $ticket->save();
-        $usuario = User::where('email', $request->input('usuario'))
+        $usuario = User::where('email', $request->input('email'))
             ->where('baja_logica', false)
             ->first();
 
@@ -75,7 +77,7 @@ class TicketController extends Controller
     }
 
     public function terminarTicket(Request $request){
-        if ($this->obtieneIdUsuario($request->input('usuario')) == null){
+        if ($this->obtieneIdUsuario($request->input('email'), Rol::AGENTE) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
@@ -91,12 +93,79 @@ class TicketController extends Controller
         ]);
     }
 
-    private function obtieneIdUsuario($email){
+    private function obtieneIdUsuario($email, $idRol){
         $usuario = User::where('email', $email)
             ->where('baja_logica', false)
-            ->where('rol_id_rol', Rol::AGENTE)
+            ->where('rol_id_rol', $idRol)
             ->first();
         if ($usuario == null) return null;
         else return $usuario->id_usuario;
+    }
+
+    private function validaToken($token){
+        $secreto = config('jwt.secret');
+        $jws = SimpleJWS::load($token);
+        if (!$jws->isValid($secreto)){
+            return true;
+        }
+        return false;
+    }
+
+    public function verSolicitudes(Request $request){
+        //validamos el token enviado
+        if ($this->validaToken($request->input('token'))){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Tiempo de sesión ha terminado'
+            ]);
+        }
+        //validamos el usurio tipo FUncionario
+        if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+            ]);
+        }
+        $tickets = Ticket::listadoTicketFuncionario($idUsuario);
+        return response()->json([
+            'respuesta' => true,
+            'tickets' => $tickets
+        ]);
+    }
+
+    public function calificacion(Request $request){
+        //validamos el token enviado
+        if ($this->validaToken($request->input('token'))){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Tiempo de sesión ha terminado'
+            ]);
+        }
+        //validamos el usurio tipo FUncionario
+        if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::FUNCIONARIO)) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+            ]);
+        }
+        //consultamos que no haya sido calificada anteriormenete
+        $consulta = CalificacionTicket::where('ticket_id_ticket', $request->input('ticket'))
+            ->where('usuario_id_usuario', $idUsuario)
+            ->first();
+        if ($consulta != null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Evaluación ya calificada'
+            ]);
+        }
+        CalificacionTicket::create([
+            'calificacion_id_calificacion' => $request->input('calificacion'),
+            'ticket_id_ticket' => $request->input('ticket'),
+            'usuario_id_usuario' => $idUsuario
+        ]);
+        return  response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Ticket calificado con exito'
+        ]);
     }
 }

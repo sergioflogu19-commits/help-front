@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Division;
 use App\Models\Rol;
 use App\Models\Usuario;
 use App\User;
@@ -24,7 +25,7 @@ class UsuarioController extends Controller
         $usuario->password = bcrypt($request->input('password'));
         $usuario->rol_id_rol = Rol::FUNCIONARIO;
         $usuario->cargo_id_cargo = $request->input('cargo_id_cargo');
-        $usuario->division_id_division = $request->input('division_id_division');
+        $usuario->division_id_division = Division::OTROS;
         $usuario->save();
 
         if ($this->loginAfterSignUp) return $this->login($request);
