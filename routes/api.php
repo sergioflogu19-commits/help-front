@@ -27,6 +27,7 @@ Route::group(['prefix' => 'parametros'], function() {
     Route::get('departamento', 'ParametroController@departamento');
     Route::get('division', 'ParametroController@division');
     Route::get('cargo', 'ParametroController@cargo');
+    Route::get('rol', 'ParametroController@rol');
 });
 
 Route::group(['prefix' => 'funcionario'], function() {
@@ -39,4 +40,9 @@ Route::group(['prefix' => 'agente'], function() {
     Route::post('elegir_ticket', 'TicketController@elegirTicket');
     Route::post('tomar_ticket', 'TicketController@tomarTicket');
     Route::post('terminar_ticket', 'TicketController@terminarTicket');
+});
+Route::group(['prefix' => 'admin'], function() {
+    Route::put('store/{id}', 'UsuarioController@store');
+    Route::post('index', 'UsuarioController@index');
+    Route::post('eliminar', 'UsuarioController@eliminar');
 });

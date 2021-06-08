@@ -43,17 +43,13 @@ class SolicitudRequerimientoController extends Controller
             //a la par se crea el TIcket en espera
             $ticket = new Ticket();
             //momentaneo
-            $ticket->numero = 0;
+            $ticket->numero = $this->generarCodigo();
             $ticket->estado_id_estado = Estado::EN_ESPERA;
             $ticket->requerimiento_id_requerimiento = $requerimiento->id_requerimiento;
             //TODO
             $ticket->comentarios = '';
             $respuesta = $ticket->save();
             if ($respuesta){
-                // se añade un numero de acuerdo al total de tickets
-                $listaTicket = Ticket::all();
-                $ticket->numero = $listaTicket->count();
-                $ticket->save();
                 return response()->json([
                     'respuesta' => true,
                     'requerimiento' => $requerimiento
@@ -87,5 +83,17 @@ class SolicitudRequerimientoController extends Controller
             ->first();
         if ($usuario == null) return null;
         else return $usuario->id_usuario;
+    }
+
+    private function generarCodigo(){
+        $caracteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        while (true){
+            $codigo = substr(str_shuffle($caracteres), 0, 5);
+            $respuesta = Ticket::where('numero', $codigo)
+                ->first();
+            if ($respuesta == null){
+                return $codigo;
+            }
+        }
     }
 }

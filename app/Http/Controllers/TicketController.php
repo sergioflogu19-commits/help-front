@@ -51,23 +51,31 @@ class TicketController extends Controller
     }
 
     public function tomarTicket(Request $request){
-        if ($this->obtieneIdUsuario($request->input('email'), Rol::AGENTE) == null){
+        //validando que solamente un AGENTE puede tomar un ticket
+        if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::AGENTE)) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
             ]);
         }
+        //buscamos el anterior ticket para inactivarlo
         $ticket = Ticket::findOrFail($request->input('idTicket'));
-        $ticket->estado_id_estado = Estado::EN_PROCESO;
+        $ticket->activo = Ticket::INACTIVO;
         $ticket->save();
-        $usuario = User::where('email', $request->input('email'))
-            ->where('baja_logica', false)
-            ->first();
-
+        //cramos el nuevo ticket para que se convierta en el Activo
+        $ticketActivo = new Ticket();
+        $ticketActivo->id_padre = $ticket->id_ticket;
+        $ticketActivo->numero = $ticket->numero;
+        $ticketActivo->estado_id_estado = Estado::EN_PROCESO;
+        $ticketActivo->requerimiento_id_requerimiento = $ticket->requerimiento_id_requerimiento;
+        $ticketActivo->comentarios = $ticket->comentarios;
+        $ticketActivo->save();
+        //Completamos en la tabla Asignado
         $asignado = new Asignado();
-        $asignado->usuario_id_usuario = $usuario->id_usuario;
-        $asignado->ticket_id_ticket = $ticket->id_ticket;
+        $asignado->usuario_id_usuario = $idUsuario;
+        $asignado->ticket_id_ticket = $ticketActivo->id_ticket;
         $asignado->fecha = date('d/m/Y');
+        //TODO
         $asignado->asignado = '';
         $asignado->save();
         return response()->json([
@@ -77,16 +85,33 @@ class TicketController extends Controller
     }
 
     public function terminarTicket(Request $request){
-        if ($this->obtieneIdUsuario($request->input('email'), Rol::AGENTE) == null){
+        //validando que solamente un AGENTE puede tomar un ticket
+        if (($idUsuario = $this->obtieneIdUsuario($request->input('email'), Rol::AGENTE)) == null){
             return  response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para la asignacion de Ticket'
             ]);
         }
+        //buscamos el anterior ticket para inactivarlo
         $ticket = Ticket::findOrFail($request->input('idTicket'));
-        $ticket->estado_id_estado = Estado::CERRADO;
-        $ticket->fecha_registro = date('d/m/Y h:i:sa');
+        $ticket->activo = Ticket::INACTIVO;
         $ticket->save();
+        //cramos el nuevo ticket para que se convierta en el Activo
+        $ticketActivo = new Ticket();
+        $ticketActivo->id_padre = $ticket->id_padre;
+        $ticketActivo->numero = $ticket->numero;
+        $ticketActivo->estado_id_estado = Estado::CERRADO;
+        $ticketActivo->requerimiento_id_requerimiento = $ticket->requerimiento_id_requerimiento;
+        $ticketActivo->comentarios = $ticket->comentarios;
+        $ticketActivo->save();
+        //Completamos en la tabla Asignado
+        $asignado = new Asignado();
+        $asignado->usuario_id_usuario = $idUsuario;
+        $asignado->ticket_id_ticket = $ticketActivo->id_ticket;
+        $asignado->fecha = date('d/m/Y');
+        //TODO
+        $asignado->asignado = '';
+        $asignado->save();
         return response()->json([
             'respuesta' => true,
             'mensaje' => 'Ticket terminado con exito'

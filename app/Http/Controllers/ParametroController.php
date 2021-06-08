@@ -77,4 +77,11 @@ class ParametroController extends Controller
             'cargos' => Cargo::all()
         ]);
     }
+
+    public function rol(){
+        return response()->json([
+            'respuesta' => true,
+            'roles' => Rol::all()
+        ]);
+    }
 }

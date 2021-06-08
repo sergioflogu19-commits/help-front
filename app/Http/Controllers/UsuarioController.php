@@ -99,4 +99,69 @@ class UsuarioController extends Controller
         }
         return false;
     }
+
+    //para el administrador
+    public function index(Request $request){
+        if (($this->obtieneIdUsuario($request->input('email'), Rol::ADMINISTRADOR)) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+            ]);
+        }
+        $users = User::where('baja_logica', false)
+            ->orderBy('id_usuario', 'desc')
+            ->get();
+        return response()->json([
+            'respuesta' => true,
+            'users' => $users
+        ]);
+    }
+
+    public function store($id, Request $request ){
+        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+            ]);
+        }
+        $user = User::findOrFail($id);
+        $user->nombre = $request->input('nombre');
+        $user->ap_paterno = $request->input('ap_paterno');
+        $user->ap_materno = $request->input('ap_materno');
+        $user->ap_materno = $request->input('ap_materno');
+        $user->rol_id_rol = $request->input('rol_id_rol');
+        $user->cargo_id_cargo = $request->input('cargo_id_cargo');
+        $user->division_id_division = $request->input('division_id_division');
+        $user->save();
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Usuario editado con exito'
+        ]);
+    }
+
+    public function eliminar(Request $request){
+        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para ver las solicitudes'
+            ]);
+        }
+        $user = User::findOrFail($request->input('id_usuario'));
+        $user->baja_logica = true;
+        $user->save();
+        return response()->json([
+            'respuesta' => true,
+            'mensaje' => 'Usuario eliminado con exito'
+        ]);
+    }
+
+    private function obtieneIdUsuario($email, $idRol){
+        $usuario = User::where('email', $email)
+            ->where('baja_logica', false)
+            ->where('rol_id_rol', $idRol)
+            ->first();
+        if ($usuario == null) return null;
+        else return $usuario->id_usuario;
+    }
+
 }
