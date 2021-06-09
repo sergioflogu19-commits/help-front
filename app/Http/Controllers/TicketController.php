@@ -68,7 +68,7 @@ class TicketController extends Controller
         $ticketActivo->numero = $ticket->numero;
         $ticketActivo->estado_id_estado = Estado::EN_PROCESO;
         $ticketActivo->requerimiento_id_requerimiento = $ticket->requerimiento_id_requerimiento;
-        $ticketActivo->comentarios = $ticket->comentarios;
+        $ticketActivo->comentarios = $request->input('comentario');
         $ticketActivo->save();
         //Completamos en la tabla Asignado
         $asignado = new Asignado();
@@ -102,7 +102,7 @@ class TicketController extends Controller
         $ticketActivo->numero = $ticket->numero;
         $ticketActivo->estado_id_estado = Estado::CERRADO;
         $ticketActivo->requerimiento_id_requerimiento = $ticket->requerimiento_id_requerimiento;
-        $ticketActivo->comentarios = $ticket->comentarios;
+        $ticketActivo->comentarios = $request->input('comentario');
         $ticketActivo->save();
         //Completamos en la tabla Asignado
         $asignado = new Asignado();
@@ -191,6 +191,19 @@ class TicketController extends Controller
         return  response()->json([
             'respuesta' => true,
             'mensaje' => 'Ticket calificado con exito'
+        ]);
+    }
+
+    public function historico(Request $request){
+        $tickets = Ticket::historial($request->input('numero'));
+        foreach ($tickets as $ticket) {
+            $idRequerimiento = $ticket->requerimiento_id_requerimiento;
+        }
+        $requerimientos = Requerimiento::requerimiento($idRequerimiento);
+        return  response()->json([
+            'respuesta' => true,
+            'tickets' => $tickets,
+            'requerimiento' => $requerimientos[0]
         ]);
     }
 }

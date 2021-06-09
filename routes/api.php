@@ -40,6 +40,7 @@ Route::group(['prefix' => 'agente'], function() {
     Route::post('elegir_ticket', 'TicketController@elegirTicket');
     Route::post('tomar_ticket', 'TicketController@tomarTicket');
     Route::post('terminar_ticket', 'TicketController@terminarTicket');
+    Route::post('historico', 'TicketController@historico');
 });
 Route::group(['prefix' => 'admin'], function() {
     Route::put('store/{id}', 'UsuarioController@store');

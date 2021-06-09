@@ -12,9 +12,9 @@ class Ticket extends Model
     protected $primaryKey = 'id_ticket';
     public $timestamps = false;
 
-    protected $fillable = ['numero', 'estado_id_estado', 'requerimiento_id_requerimiento', 'comentarios', 'id_padre', 'activo'];
+    protected $fillable = ['numero', 'estado_id_estado', 'requerimiento_id_requerimiento', 'comentarios', 'id_padre', 'activo', 'fecha_registro'];
     protected $hidden = [
-        'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
+        'baja_logica', 'usuario_registro', 'ip_registro'
     ];
 
     const ACTIVO = true;
@@ -47,7 +47,7 @@ class Ticket extends Model
                     inner join public.categoria d on c.categoria_id_categoria = d.id_categoria
                     inner join public.usuario e on b.usuario_id_usuario = e.id_usuario
                     where a.baja_logica is false and a.activo is true
-                    order by 2 desc"
+                    order by 10 desc"
         );
     }
 
@@ -86,8 +86,28 @@ class Ticket extends Model
                     inner join public.tipo_requerimiento c on b.tipo_requerimiento_id_tipo_req = c.id_tipo_req
                     inner join public.categoria d on c.categoria_id_categoria = d.id_categoria
                     inner join public.usuario e on b.usuario_id_usuario = e.id_usuario
-                    where a.baja_logica is false and b.usuario_id_usuario = ?
+                    where a.baja_logica is false
+                    and a.activo is true 
+                    and b.usuario_id_usuario = ?
                     order by 2 desc", [$idUsuario]
+        );
+    }
+
+    public static function historial($numero){
+        return DB::connection('help')->select(
+            "(select a.numero, a.estado_id_estado, a.requerimiento_id_requerimiento,
+                            a.fecha_registro, a.comentarios, a.activo,
+                            c.nombre, c.ap_paterno, c.ap_materno
+                    from public.ticket a
+                    inner join public.asignado b on a.id_ticket = b.ticket_id_ticket
+                    inner join public.usuario c on b.usuario_id_usuario = c.id_usuario
+                    where a.numero = ?)
+                    union 
+                    (select a.numero, a.estado_id_estado, a.requerimiento_id_requerimiento,
+                            a.fecha_registro, a.comentarios, a.activo, NULL, null, null
+                    from public.ticket a
+                    where a.numero = ? and a.id_padre is null)
+                    order by fecha_registro", [$numero, $numero]
         );
     }
 }
