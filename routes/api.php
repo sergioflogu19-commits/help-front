@@ -34,6 +34,7 @@ Route::group(['prefix' => 'funcionario'], function() {
     Route::post('solicitar_req', 'SolicitudRequerimientoController@solicitudReq');
     Route::post('ver_solicitudes', 'TicketController@verSolicitudes');
     Route::post('calificacion', 'TicketController@calificacion');
+    Route::post('editar_req', 'SolicitudRequerimientoController@editarRequerimiento');
 });
 Route::group(['prefix' => 'agente'], function() {
     Route::post('tickets', 'TicketController@listadoReq');
@@ -41,6 +42,10 @@ Route::group(['prefix' => 'agente'], function() {
     Route::post('tomar_ticket', 'TicketController@tomarTicket');
     Route::post('terminar_ticket', 'TicketController@terminarTicket');
     Route::post('historico', 'TicketController@historico');
+    Route::post('cambiar_estado', 'TicketController@cambiarEstado');
+    Route::get('ticket/{id_ticket}', 'TicketController@ticket');
+    Route::get('listado', 'UsuarioController@listarAgentes');
+    Route::post('cambio_agente', 'TicketController@cambioAgente');
 });
 Route::group(['prefix' => 'admin'], function() {
     Route::put('store/{id}', 'UsuarioController@store');

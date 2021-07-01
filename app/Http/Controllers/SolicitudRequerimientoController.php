@@ -49,6 +49,11 @@ class SolicitudRequerimientoController extends Controller
             //TODO
             $ticket->comentarios = '';
             $respuesta = $ticket->save();
+            $detalles = [
+                'titulo' => 'Confirmación',
+                'body' => 'Su solicitud fue creado con éxito y se le mandara un email cuando un agente haya tomado su Requerimiento'
+            ];
+            \Mail::to($request->input('email'))->send(new \App\Mail\InvoiceMail($detalles));
             if ($respuesta){
                 return response()->json([
                     'respuesta' => true,
@@ -67,6 +72,39 @@ class SolicitudRequerimientoController extends Controller
         ]);
     }
 
+    public function editarRequerimiento(Request $request){
+        //validamos el token enviado
+        if ($this->validaToken($request->input('token'))){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Tiempo de sesión ha terminado'
+            ]);
+        }
+
+        if ($this->obtieneIdUsuario($request->input('email')) == null){
+            return  response()->json([
+                'respuesta' => false,
+                'mensaje' => 'Usuario no autorizado para el registro'
+            ]);
+        }
+
+        //se crea el requerimiento en BD
+        $requerimiento = Requerimiento::findOrFail($request->input('id_requerimiento'));
+        $requerimiento->descripcion = $request->input('descripcion');
+        $requerimiento->interno = $request->input('interno');
+        $requerimiento->usuario_id_usuario = $this->obtieneIdUsuario($request->input('email'));
+        $requerimiento->departamento_id_departamento = $request->input('departamento_id_departamento');
+        $requerimiento->tipo_requerimiento_id_tipo_req = $request->input('tipo_requerimiento_id_tipo_req');
+        $requerimiento->sucursal_id_sucursal = $request->input('sucursal_id_sucursal');
+        $respuesta = $requerimiento->save();
+        if ($respuesta){
+            return  response()->json([
+                'respuesta' => true,
+                'mensaje' => 'Requerimiento modificado con exito'
+            ]);
+        }
+    }
+
     private function validaToken($token){
         $secreto = config('jwt.secret');
         $jws = SimpleJWS::load($token);
@@ -79,7 +117,6 @@ class SolicitudRequerimientoController extends Controller
     private function obtieneIdUsuario($email){
         $usuario = User::where('email', $email)
             ->where('baja_logica', false)
-            ->where('rol_id_rol', Rol::FUNCIONARIO)
             ->first();
         if ($usuario == null) return null;
         else return $usuario->id_usuario;

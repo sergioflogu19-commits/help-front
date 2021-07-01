@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Division;
 use App\Models\Rol;
 use App\Models\Usuario;
@@ -29,7 +30,7 @@ class UsuarioController extends Controller
         $usuario->save();
 
         if ($this->loginAfterSignUp) return $this->login($request);
-        return  response()->json([
+        return response()->json([
             'respuesta' => true,
             'usuario' => $usuario
         ]);
@@ -39,8 +40,8 @@ class UsuarioController extends Controller
     {
         $input = $request->only('email', 'password');
         $jwt_token = null;
-        if (!$jwt_token = JWTAuth::attempt($input)){
-            return  response()->json([
+        if (!$jwt_token = JWTAuth::attempt($input)) {
+            return response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Correo o contraseña no válidos'
             ]);
@@ -52,14 +53,15 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
         $this->validate($request, [
-           'token' => 'required'
+            'token' => 'required'
         ]);
-        try{
+        try {
             $secreto = config('jwt.secret');
             $jws = SimpleJWS::load($request->input('token'));
-            if (!$jws->isValid($secreto)){
+            if (!$jws->isValid($secreto)) {
 
             }
 
@@ -68,8 +70,8 @@ class UsuarioController extends Controller
                 'respuesta' => true,
                 'mensaje' => 'Cierre de sesión exitoso'
             ]);
-        }catch (JWTException  $exception) {
-            return  response()->json([
+        } catch (JWTException  $exception) {
+            return response()->json([
                 'respuesta' => false,
                 'message' => 'Al usuario no se le pudo cerrar la sesión'
             ]);
@@ -91,19 +93,21 @@ class UsuarioController extends Controller
         ]);
     }
 
-    private function validaToken($token){
+    private function validaToken($token)
+    {
         $secreto = config('jwt.secret');
         $jws = SimpleJWS::load($token);
-        if (!$jws->isValid($secreto)){
+        if (!$jws->isValid($secreto)) {
             return true;
         }
         return false;
     }
 
     //para el administrador
-    public function index(Request $request){
-        if (($this->obtieneIdUsuario($request->input('email'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
+    public function index(Request $request)
+    {
+        if (($this->obtieneIdUsuario($request->input('email'), Rol::ADMINISTRADOR)) == null) {
+            return response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
@@ -117,9 +121,10 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function store($id, Request $request ){
-        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
+    public function store($id, Request $request)
+    {
+        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null) {
+            return response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
@@ -139,9 +144,10 @@ class UsuarioController extends Controller
         ]);
     }
 
-    public function eliminar(Request $request){
-        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null){
-            return  response()->json([
+    public function eliminar(Request $request)
+    {
+        if (($this->obtieneIdUsuario($request->input('usuario'), Rol::ADMINISTRADOR)) == null) {
+            return response()->json([
                 'respuesta' => false,
                 'mensaje' => 'Usuario no autorizado para ver las solicitudes'
             ]);
@@ -155,13 +161,26 @@ class UsuarioController extends Controller
         ]);
     }
 
-    private function obtieneIdUsuario($email, $idRol){
+    private function obtieneIdUsuario($email, $idRol)
+    {
         $usuario = User::where('email', $email)
             ->where('baja_logica', false)
             ->where('rol_id_rol', $idRol)
             ->first();
         if ($usuario == null) return null;
         else return $usuario->id_usuario;
+    }
+
+    public function listarAgentes()
+    {
+        $agentes = User::where('rol_id_rol', Rol::AGENTE)
+            ->where('baja_logica', false)
+            ->orderBy('ap_paterno')
+            ->get();
+        return response()->json([
+            'respuesta' => true,
+            'agentes' => $agentes
+        ]);
     }
 
 }

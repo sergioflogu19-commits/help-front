@@ -25,7 +25,8 @@ class Requerimiento extends Model
 
     public static function requerimiento($idRequerimiento){
         return DB::connection('help')->select(
-            "select a.descripcion,
+            "select  a.id_requerimiento, 
+                            a.descripcion,
                             (select nombre || ' ' || ap_paterno || ' ' || ap_materno
                             from public.usuario where id_usuario = a.usuario_id_usuario limit 1) usuario,
                             interno,
@@ -38,6 +39,27 @@ class Requerimiento extends Model
                             a.fecha_registro        
                     from public.requerimiento a
                     where id_requerimiento = ?", [$idRequerimiento]
+        );
+    }
+
+    public static function requerimientoDetalle($idRequerimiento){
+        return DB::connection('help')->select(
+            "SELECT 
+                  a.id_requerimiento,
+                  a.descripcion,
+                  a.usuario_id_usuario,
+                  a.interno,
+                  a.tipo_requerimiento_id_tipo_req,
+                  (select categoria_id_categoria 
+                  from public.tipo_requerimiento 
+                  where id_tipo_req = a.tipo_requerimiento_id_tipo_req limit 1) categoria_id,
+                  a.departamento_id_departamento,
+                  a.sucursal_id_sucursal,
+                  (select municipio_id_lugar
+                  from public.sucursal 
+                  where id_sucursal = a.sucursal_id_sucursal limit 1) municipio_id
+                FROM public.requerimiento a
+                where id_requerimiento = ?", [$idRequerimiento]
         );
     }
 }
