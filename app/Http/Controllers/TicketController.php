@@ -286,4 +286,29 @@ class TicketController extends Controller
             'mensaje' => 'Se cambio el Agente del Ticket'
         ]);
     }
+
+    public function ticketProceso(){
+        $tickets = Ticket::ticketsProceso();
+        $correos = [];
+        foreach ($tickets as $ticket) {
+            if ($ticket->dias_pasados >= 3){
+                //se prepara el correo para el solicitante a su cuenta
+                $detalles = [
+                    'titulo' => 'Alerta de Ticket en Espera',
+                    'body' => "Sr. $ticket->nombre $ticket->ap_paterno: \n Tiene el ticket Nª: $ticket->numero en espera hace mas de 3 dias, tiene que TERMINAR"
+                ];
+                \Mail::to($ticket->email)->send(new \App\Mail\InvoiceMail($detalles));
+                array_push($correos, $ticket->email);
+            }
+        }
+        if (count($correos) == 0){
+            return response()->json([
+                'mensaje' => 'No hay tickets de mora'
+            ]);
+        }
+        return response()->json([
+            'mensaje' => 'Se ha enviado correos a los tickets en proceso con mora',
+            'correos' => $correos
+        ]);
+    }
 }

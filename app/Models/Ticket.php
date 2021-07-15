@@ -113,4 +113,26 @@ class Ticket extends Model
                     order by fecha_registro", [$numero, $numero]
         );
     }
+
+    public static function ticketsProceso(){
+        return DB::connection('help')->select(
+            "SELECT 
+                      a.id_ticket,
+                      a.numero,
+                      a.requerimiento_id_requerimiento,
+                      a.comentarios,
+                      b.usuario_id_usuario,
+                      c.email,
+                      c.nombre,
+                      c.ap_paterno,
+                      c.ap_materno,
+                      EXTRACT(DAY FROM age(timestamp 'now()',date(a.fecha_registro))) as dias_pasados
+                    FROM public.ticket a
+                    inner join public.asignado b on a.id_ticket = b.ticket_id_ticket
+                    inner join public.usuario c on b.usuario_id_usuario = c.id_usuario
+                    where a.estado_id_estado = ?
+                    and a.baja_logica is false
+                    and a.activo is true", [ Estado::EN_PROCESO ]
+        );
+    }
 }

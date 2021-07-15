@@ -46,6 +46,7 @@ Route::group(['prefix' => 'agente'], function() {
     Route::get('ticket/{id_ticket}', 'TicketController@ticket');
     Route::get('listado', 'UsuarioController@listarAgentes');
     Route::post('cambio_agente', 'TicketController@cambioAgente');
+    Route::get('enviar_correo_proceso', 'TicketController@ticketProceso');
 });
 Route::group(['prefix' => 'admin'], function() {
     Route::put('store/{id}', 'UsuarioController@store');

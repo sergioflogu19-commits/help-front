@@ -49,6 +49,7 @@ class SolicitudRequerimientoController extends Controller
             //TODO
             $ticket->comentarios = '';
             $respuesta = $ticket->save();
+
             $detalles = [
                 'titulo' => 'Confirmación',
                 'body' => 'Su solicitud fue creado con éxito y se le mandara un email cuando un agente haya tomado su Requerimiento'
