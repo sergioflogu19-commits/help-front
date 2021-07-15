@@ -135,4 +135,26 @@ class Ticket extends Model
                     and a.activo is true", [ Estado::EN_PROCESO ]
         );
     }
+
+    public static function ticketsEnEspera(){
+        return DB::connection('help')->select(
+            "SELECT 
+                      a.id_ticket,
+                      a.numero,
+                      a.requerimiento_id_requerimiento,
+                      a.comentarios,  
+                      d.email,
+                      d.nombre,
+                      d.ap_paterno,
+                      d.ap_materno,
+                      EXTRACT(DAY FROM age(timestamp 'now()',date(a.fecha_registro))) as dias_pasados
+                    FROM public.ticket a
+                    inner join public.requerimiento b on a.requerimiento_id_requerimiento = b.id_requerimiento
+                    inner join public.tipo_requerimiento c on b.tipo_requerimiento_id_tipo_req = c.id_tipo_req
+                    inner join public.usuario d on c.division_id_division = d.division_id_division
+                    where a.estado_id_estado = ?
+                    and a.baja_logica is false
+                    and a.activo is true;", [ Estado::EN_ESPERA ]
+        );
+    }
 }
