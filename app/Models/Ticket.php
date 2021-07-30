@@ -20,7 +20,7 @@ class Ticket extends Model
     const ACTIVO = true;
     const INACTIVO = false;
 
-    public static function listadoTikets(){
+    public static function listadoTikets($idDivision){
         return DB::connection('help')->select(
             "SELECT a.id_ticket,
                             a.numero,
@@ -50,7 +50,8 @@ class Ticket extends Model
                     inner join public.usuario e on b.usuario_id_usuario = e.id_usuario
                     inner join public.cargo f on e.cargo_id_cargo = f.id_cargo
                     where a.baja_logica is false and a.activo is true
-                    order by a.estado_id_estado, f.prioridad_id_prioridad DESC, b.fecha_registro desc"
+                    and e.division_id_division = ?
+                    order by a.estado_id_estado, f.prioridad_id_prioridad DESC, b.fecha_registro desc", [$idDivision]
         );
     }
 

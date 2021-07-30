@@ -28,7 +28,6 @@ class SolicitudRequerimientoController extends Controller
                 'mensaje' => 'Usuario no autorizado para el registro'
             ]);
         }
-
         //se crea el requerimiento en BD
         $requerimiento = new Requerimiento();
         $requerimiento->descripcion = $request->input('descripcion');
@@ -37,6 +36,7 @@ class SolicitudRequerimientoController extends Controller
         $requerimiento->departamento_id_departamento = $request->input('departamento_id_departamento');
         $requerimiento->tipo_requerimiento_id_tipo_req = $request->input('tipo_requerimiento_id_tipo_req');
         $requerimiento->sucursal_id_sucursal = $request->input('sucursal_id_sucursal');
+        $requerimiento->archivo = ($request->input('archivo'));
         $respuesta = $requerimiento->save();
 
         if ($respuesta){

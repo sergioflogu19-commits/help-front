@@ -13,7 +13,7 @@ class Requerimiento extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'descripcion', 'usuario_id_usuario', 'interno', 'tipo_requerimiento_id_tipo_req', 'departamento_id_departamento', 'sucursal_id_sucursal'
+        'descripcion', 'usuario_id_usuario', 'interno', 'tipo_requerimiento_id_tipo_req', 'departamento_id_departamento', 'sucursal_id_sucursal', 'archivo'
     ];
     protected $hidden = [
         'baja_logica', 'fecha_registro', 'usuario_registro', 'ip_registro'
